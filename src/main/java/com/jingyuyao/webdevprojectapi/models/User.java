@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 public class User {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private int id;
