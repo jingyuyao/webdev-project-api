@@ -27,8 +27,8 @@ public class UserService {
     this.idTokenValidator = idTokenValidator;
   }
 
-  @PostMapping("/api/loginOrRegister")
-  public ResponseEntity<User> loginOrRegister(
+  @PostMapping("/api/logInOrRegister")
+  public ResponseEntity<User> logInOrRegister(
       @Valid @RequestBody IdTokenPayload idTokenPayload, HttpSession httpSession) {
     IdentityProvider identityProvider = idTokenPayload.getIdentityProvider();
     String idToken = idTokenPayload.getIdToken();
@@ -50,8 +50,8 @@ public class UserService {
         .orElseGet(() -> ResponseEntity.badRequest().build());
   }
 
-  @PostMapping("/api/logout")
-  public void logout(HttpSession httpSession) {
+  @PostMapping("/api/logOut")
+  public void logOut(HttpSession httpSession) {
     httpSession.invalidate();
   }
 
