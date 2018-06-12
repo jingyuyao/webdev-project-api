@@ -1,4 +1,4 @@
-package com.jingyuyao.webdevprojectapi.service;
+package com.jingyuyao.webdevprojectapi.services;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
