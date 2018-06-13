@@ -10,6 +10,8 @@ CS4550 2018 Summer 1 final project by Jingyu Yao.
 
 Booting up a local server:
 ```
-DBHOSTNAME=$hostname$ DBSCHEMA=$schema$ DBUSERNAME=$username$ DBPASSWORD=$password$ ./mvnw spring-boot:run
+DBHOSTNAME=$hostname$ DBSCHEMA=$schema$ DBUSERNAME=$username$ DBPASSWORD=$password$ \
+  MASHAPE_KEY=$mashapekey$ \
+  ./mvnw spring-boot:run
 ```
 where the environment variables point to a MySql database.
