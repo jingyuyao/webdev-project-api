@@ -8,7 +8,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserService {
 
   private static final String USER_ID = "user_id";
+  private static final String PROVIDED_ID = "provided_id";
 
   private final UserRepository userRepository;
   private final IdTokenValidator idTokenValidator;
@@ -33,44 +33,40 @@ public class UserService {
     IdentityProvider identityProvider = idTokenPayload.getIdentityProvider();
     String idToken = idTokenPayload.getIdToken();
     Integer sessionUserId = (Integer) httpSession.getAttribute(USER_ID);
+    String sessionProvidedId = (String) httpSession.getAttribute(PROVIDED_ID);
 
     return idTokenValidator
         .validate(identityProvider, idToken)
-        .map(validUser ->
-            userRepository
-                .findByIdentityProviderAndProvidedId(identityProvider, validUser.getProvidedId())
+        .map(validUser -> {
+          String providedId = validUser.getProvidedId();
+          if (sessionUserId != null && providedId.equals(sessionProvidedId)) {
+            // Trust session.
+            return userRepository
+                .findById(sessionUserId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+          } else {
+            // Update session.
+            httpSession.setAttribute(PROVIDED_ID, providedId);
+            return userRepository
+                .findByIdentityProviderAndProvidedId(identityProvider, providedId)
                 .map(savedUser -> {
-                  if (sessionUserId == null || sessionUserId != savedUser.getId()) {
-                    httpSession.setAttribute(USER_ID, savedUser.getId());
-                  }
+                  httpSession.setAttribute(USER_ID, savedUser.getId());
                   return ResponseEntity.ok(savedUser);
                 })
                 .orElseGet(() -> {
                   User savedUser = userRepository.save(validUser);
-                  if (sessionUserId == null || sessionUserId != savedUser.getId()) {
-                    httpSession.setAttribute(USER_ID, savedUser.getId());
-                  }
+                  httpSession.setAttribute(USER_ID, savedUser.getId());
                   return ResponseEntity.ok(savedUser);
-                }))
+                });
+          }
+        })
         .orElseGet(() -> ResponseEntity.badRequest().build());
   }
 
   @PostMapping("/api/logOut")
   public void logOut(HttpSession httpSession) {
     httpSession.invalidate();
-  }
-
-  @GetMapping("/api/profile")
-  public ResponseEntity<User> profile(HttpSession httpSession) {
-    Integer userId = (Integer) httpSession.getAttribute(USER_ID);
-    if (userId != null) {
-      return userRepository
-          .findById(userId)
-          .map(ResponseEntity::ok)
-          .orElseGet(() -> ResponseEntity.notFound().build());
-    } else {
-      return ResponseEntity.notFound().build();
-    }
   }
 
   public static class IdTokenPayload {
