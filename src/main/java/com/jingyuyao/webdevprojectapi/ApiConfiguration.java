@@ -15,6 +15,7 @@ public class ApiConfiguration {
       public void addCorsMappings(CorsRegistry registry) {
         registry
             .addMapping("/**")
+            .allowCredentials(true)
             .allowedMethods("*")
             .allowedOrigins(
                 "http://localhost:4200",

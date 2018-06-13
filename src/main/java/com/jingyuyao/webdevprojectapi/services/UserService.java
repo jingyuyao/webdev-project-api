@@ -32,6 +32,7 @@ public class UserService {
       @Valid @RequestBody IdTokenPayload idTokenPayload, HttpSession httpSession) {
     IdentityProvider identityProvider = idTokenPayload.getIdentityProvider();
     String idToken = idTokenPayload.getIdToken();
+    Integer sessionUserId = (Integer) httpSession.getAttribute(USER_ID);
 
     return idTokenValidator
         .validate(identityProvider, idToken)
@@ -39,12 +40,16 @@ public class UserService {
             userRepository
                 .findByIdentityProviderAndProvidedId(identityProvider, validUser.getProvidedId())
                 .map(savedUser -> {
-                  httpSession.setAttribute(USER_ID, savedUser.getId());
+                  if (sessionUserId == null || sessionUserId != savedUser.getId()) {
+                    httpSession.setAttribute(USER_ID, savedUser.getId());
+                  }
                   return ResponseEntity.ok(savedUser);
                 })
                 .orElseGet(() -> {
                   User savedUser = userRepository.save(validUser);
-                  httpSession.setAttribute(USER_ID, savedUser.getId());
+                  if (sessionUserId == null || sessionUserId != savedUser.getId()) {
+                    httpSession.setAttribute(USER_ID, savedUser.getId());
+                  }
                   return ResponseEntity.ok(savedUser);
                 }))
         .orElseGet(() -> ResponseEntity.badRequest().build());
