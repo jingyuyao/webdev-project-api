@@ -3,12 +3,18 @@ package com.jingyuyao.webdevprojectapi.models;
 import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class Card {
 
   @Id
+  @NotNull
   private String id;
+
+  public String getId() {
+    return id;
+  }
 
   @Override
   public boolean equals(Object o) {

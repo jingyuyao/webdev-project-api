@@ -8,7 +8,5 @@ public interface DeckRepository extends CrudRepository<Deck, Integer> {
 
   Optional<Deck> findByIdAndUserId(int id, int userId);
 
-  Iterable<Deck> findAllByUserId(int userId);
-
   Iterable<Deck> findAllByTitleIgnoreCaseContaining(String title);
 }
