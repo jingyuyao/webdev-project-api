@@ -55,8 +55,16 @@ public class DeckService {
         .orElseGet(() -> ResponseEntity.notFound().build());
   }
 
+  @GetMapping("/api/deck/{id}")
+  public ResponseEntity<Deck> findById(@PathVariable int id) {
+    return deckRepository
+        .findById(id)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
   @GetMapping("/api/deck/{id}/cards")
-  public ResponseEntity<Set<Card>> getCards(@PathVariable int id) {
+  public ResponseEntity<Set<Card>> findCardsByDeckId(@PathVariable int id) {
     return deckRepository
         .findById(id)
         .map(Deck::getCards)
@@ -65,7 +73,7 @@ public class DeckService {
   }
 
   @PostMapping("/api/deck")
-  public ResponseEntity<Deck> create(@Valid @RequestBody Deck deck, HttpSession httpSession) {
+  public ResponseEntity<Deck> createDeck(@Valid @RequestBody Deck deck, HttpSession httpSession) {
     return UserService
         .getUserId(httpSession)
         .flatMap(userRepository::findById)
@@ -94,7 +102,7 @@ public class DeckService {
   }
 
   @PutMapping("/api/deck/{id}/cards")
-  public ResponseEntity<Set<Card>> updateCards(
+  public ResponseEntity<Set<Card>> updateDeckCards(
       @PathVariable int id, @Valid @RequestBody Set<Card> cards, HttpSession httpSession) {
     return UserService
         .getUserId(httpSession)
@@ -111,7 +119,7 @@ public class DeckService {
   }
 
   @DeleteMapping("/api/deck/{id}")
-  public ResponseEntity delete(@PathVariable int id, HttpSession httpSession) {
+  public ResponseEntity deleteDeck(@PathVariable int id, HttpSession httpSession) {
     return UserService
         .getUserId(httpSession)
         .flatMap(userRepository::findById)
