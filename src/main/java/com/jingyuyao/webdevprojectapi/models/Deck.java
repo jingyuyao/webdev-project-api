@@ -1,15 +1,14 @@
 package com.jingyuyao.webdevprojectapi.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.ElementCollection;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
@@ -23,21 +22,15 @@ public class Deck {
   private String title;
   @NotNull
   private String description;
-  @JsonProperty(access = Access.WRITE_ONLY)
+  @JsonIgnore
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   private User user;
-  /**
-   * Card data is stored in the external API so we only keep the keys.
-   */
-  @ElementCollection
-  private List<String> cardIds = new ArrayList<>();
+  @JsonIgnore
+  @ManyToMany
+  private Set<Card> cards = new HashSet<>();
 
   public int getId() {
     return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
   }
 
   public String getTitle() {
@@ -64,7 +57,7 @@ public class Deck {
     this.user = user;
   }
 
-  public List<String> getCardIds() {
-    return cardIds;
+  public Set<Card> getCards() {
+    return cards;
   }
 }

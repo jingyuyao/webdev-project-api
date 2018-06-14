@@ -61,9 +61,9 @@ public class DeckService {
         .flatMap(userRepository::findById)
         .flatMap(user -> deckRepository.findByIdAndUserId(id, user.getId()))
         .map(savedDeck -> {
-          deck.setId(id);
-          deck.setUser(savedDeck.getUser());
-          return deckRepository.save(deck);
+          savedDeck.setTitle(deck.getTitle());
+          savedDeck.setDescription(deck.getDescription());
+          return deckRepository.save(savedDeck);
         })
         .map(ResponseEntity::ok)
         .orElseGet(() -> ResponseEntity.badRequest().build());
