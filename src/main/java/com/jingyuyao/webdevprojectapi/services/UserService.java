@@ -3,6 +3,7 @@ package com.jingyuyao.webdevprojectapi.services;
 import com.jingyuyao.webdevprojectapi.models.User;
 import com.jingyuyao.webdevprojectapi.models.User.IdentityProvider;
 import com.jingyuyao.webdevprojectapi.repositories.UserRepository;
+import java.util.Optional;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -25,6 +26,10 @@ public class UserService {
   UserService(UserRepository userRepository, IdTokenValidator idTokenValidator) {
     this.userRepository = userRepository;
     this.idTokenValidator = idTokenValidator;
+  }
+
+  static Optional<Integer> getUserId(HttpSession httpSession) {
+    return Optional.ofNullable((Integer) httpSession.getAttribute(USER_ID));
   }
 
   @PostMapping("/api/logInOrRegister")
