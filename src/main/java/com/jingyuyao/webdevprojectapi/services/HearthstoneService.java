@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -29,48 +30,41 @@ public class HearthstoneService {
   }
 
   @GetMapping("/api/hs/cards")
-  public ResponseEntity<String> findAll() {
+  public ResponseEntity<String> findAllBy(
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) String set,
+      @RequestParam(required = false) String clazz,
+      @RequestParam(required = false) String faction,
+      @RequestParam(required = false) String quality,
+      @RequestParam(required = false) String race,
+      @RequestParam(required = false) String type) {
+    if (search != null) {
+      return get("/cards/search/{name}", search);
+    }
+    if (set != null) {
+      return get("/cards/sets/{set}", set);
+    }
+    if (clazz != null) {
+      return get("/cards/classes/{clazz}", clazz);
+    }
+    if (faction != null) {
+      return get("/cards/factions/{faction}", faction);
+    }
+    if (quality != null) {
+      return get("/cards/qualities/{quality}", quality);
+    }
+    if (race != null) {
+      return get("/cards/races/{race}", race);
+    }
+    if (type != null) {
+      return get("/cards/types/{type}", type);
+    }
     return get("/cards");
   }
 
   @GetMapping("/api/hs/cards/{id}")
   public ResponseEntity<String> findById(@PathVariable String id) {
     return get("/cards/{id}", id);
-  }
-
-  @GetMapping("/api/hs/cards/search/{name}")
-  public ResponseEntity<String> searchByName(@PathVariable String name) {
-    return get("/cards/search/{name}", name);
-  }
-
-  @GetMapping("/api/hs/cards/sets/{set}")
-  public ResponseEntity<String> findAllBySet(@PathVariable String set) {
-    return get("/cards/sets/{set}", set);
-  }
-
-  @GetMapping("/api/hs/cards/classes/{clazz}")
-  public ResponseEntity<String> findAllByClass(@PathVariable String clazz) {
-    return get("/cards/classes/{clazz}", clazz);
-  }
-
-  @GetMapping("/api/hs/cards/factions/{faction}")
-  public ResponseEntity<String> findAllByFaction(@PathVariable String faction) {
-    return get("/cards/factions/{faction}", faction);
-  }
-
-  @GetMapping("/api/hs/cards/qualities/{quality}")
-  public ResponseEntity<String> findAllByQuality(@PathVariable String quality) {
-    return get("/cards/qualities/{quality}", quality);
-  }
-
-  @GetMapping("/api/hs/cards/races/{race}")
-  public ResponseEntity<String> findAllByRace(@PathVariable String race) {
-    return get("/cards/races/{race}", race);
-  }
-
-  @GetMapping("/api/hs/cards/types/{type}")
-  public ResponseEntity<String> findAllByType(@PathVariable String type) {
-    return get("/cards/types/{type}", type);
   }
 
   private ResponseEntity<String> get(String path, Object... params) {
