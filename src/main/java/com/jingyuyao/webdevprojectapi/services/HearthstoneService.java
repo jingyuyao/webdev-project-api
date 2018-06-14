@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Pipes to external Hearthstone API using our own API key.
@@ -28,12 +29,17 @@ public class HearthstoneService {
   }
 
   @GetMapping("/api/hs/cards")
-  public ResponseEntity<String> cards() {
+  public ResponseEntity<String> findAll() {
     return get("/cards");
   }
 
+  @GetMapping("/api/hs/cards/{id}")
+  public ResponseEntity<String> findById(@PathVariable String id) {
+    return get("/cards/{id}", id);
+  }
+
   @GetMapping("/api/hs/cards/search/{name}")
-  public ResponseEntity<String> search(@PathVariable String name) {
+  public ResponseEntity<String> searchByName(@PathVariable String name) {
     return get("/cards/search/{name}", name);
   }
 
@@ -68,10 +74,18 @@ public class HearthstoneService {
   }
 
   private ResponseEntity<String> get(String path, Object... params) {
+    String uri =
+        UriComponentsBuilder
+            .fromUriString(API_HOST + path)
+            .queryParam("collectible", 1)
+            .build().toUriString();
+
     HttpHeaders headers = new HttpHeaders();
     headers.set(MASHAPE_HEADER, mashapeKey);
+
     HttpEntity<String> entity = new HttpEntity<>(headers);
     RestTemplate template = new RestTemplate();
-    return template.exchange(API_HOST + path, HttpMethod.GET, entity, String.class, params);
+
+    return template.exchange(uri, HttpMethod.GET, entity, String.class, params);
   }
 }
