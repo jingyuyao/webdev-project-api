@@ -22,6 +22,8 @@ public class Deck {
   private String title;
   @NotNull
   private String description;
+  @NotNull
+  private String cardClass;
   @JsonIgnore
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   private User user;
@@ -47,6 +49,14 @@ public class Deck {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getCardClass() {
+    return cardClass;
+  }
+
+  public void setCardClass(String cardClass) {
+    this.cardClass = cardClass;
   }
 
   public User getUser() {
