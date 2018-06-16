@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -72,6 +73,20 @@ public class UserService {
   @PostMapping("/api/logOut")
   public void logOut(HttpSession httpSession) {
     httpSession.invalidate();
+  }
+
+  @PutMapping("/api/profile")
+  public ResponseEntity<User> updateProfile(
+      @Valid @RequestBody User user, HttpSession httpSession) {
+    return getUserId(httpSession)
+        .flatMap(userRepository::findById)
+        .map(savedUser -> {
+          savedUser.setName(user.getName());
+          savedUser.setEmail(user.getEmail());
+          return userRepository.save(savedUser);
+        })
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.badRequest().build());
   }
 
   public static class IdTokenPayload {
