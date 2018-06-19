@@ -3,10 +3,12 @@ package com.jingyuyao.webdevprojectapi.services;
 import com.jingyuyao.webdevprojectapi.models.Card;
 import com.jingyuyao.webdevprojectapi.models.Deck;
 import com.jingyuyao.webdevprojectapi.models.User;
+import com.jingyuyao.webdevprojectapi.models.User.Role;
 import com.jingyuyao.webdevprojectapi.repositories.CardRepository;
 import com.jingyuyao.webdevprojectapi.repositories.DeckRepository;
 import com.jingyuyao.webdevprojectapi.repositories.UserRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
@@ -88,10 +90,7 @@ public class DeckService {
   @PutMapping("/api/deck/{id}")
   public ResponseEntity<Deck> updateDeck(
       @PathVariable int id, @Valid @RequestBody Deck deck, HttpSession httpSession) {
-    return UserService
-        .getUserId(httpSession)
-        .flatMap(userRepository::findById)
-        .flatMap(user -> deckRepository.findByIdAndUserId(id, user.getId()))
+    return getDeckIfAllowed(id, httpSession)
         .map(savedDeck -> {
           savedDeck.setTitle(deck.getTitle());
           savedDeck.setDescription(deck.getDescription());
@@ -104,10 +103,7 @@ public class DeckService {
   @PutMapping("/api/deck/{id}/cards")
   public ResponseEntity<Set<Card>> updateDeckCards(
       @PathVariable int id, @Valid @RequestBody Set<Card> cards, HttpSession httpSession) {
-    return UserService
-        .getUserId(httpSession)
-        .flatMap(userRepository::findById)
-        .flatMap(user -> deckRepository.findByIdAndUserId(id, user.getId()))
+    return getDeckIfAllowed(id, httpSession)
         .map(savedDeck -> {
           cardRepository.saveAll(cards);
           savedDeck.getCards().clear();
@@ -120,14 +116,21 @@ public class DeckService {
 
   @DeleteMapping("/api/deck/{id}")
   public ResponseEntity deleteDeck(@PathVariable int id, HttpSession httpSession) {
-    return UserService
-        .getUserId(httpSession)
-        .flatMap(userRepository::findById)
-        .flatMap(user -> deckRepository.findByIdAndUserId(id, user.getId()))
+    return getDeckIfAllowed(id, httpSession)
         .map(savedDeck -> {
           deckRepository.delete(savedDeck);
           return ResponseEntity.ok().build();
         })
         .orElseGet(() -> ResponseEntity.badRequest().build());
+  }
+
+  private Optional<Deck> getDeckIfAllowed(int id, HttpSession httpSession) {
+    return UserService
+        .getUserId(httpSession)
+        .flatMap(userRepository::findById)
+        .flatMap(user ->
+            user.getRoles().contains(Role.ADMIN)
+                ? deckRepository.findById(id)
+                : deckRepository.findByIdAndUserId(id, user.getId()));
   }
 }
