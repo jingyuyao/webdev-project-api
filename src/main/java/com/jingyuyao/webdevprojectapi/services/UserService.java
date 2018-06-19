@@ -83,6 +83,8 @@ public class UserService {
         .map(savedUser -> {
           savedUser.setName(user.getName());
           savedUser.setEmail(user.getEmail());
+          savedUser.getRoles().clear();
+          savedUser.getRoles().addAll(user.getRoles());
           return userRepository.save(savedUser);
         })
         .map(ResponseEntity::ok)
